@@ -1,5 +1,6 @@
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Point;
 
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.container.impl.bank.BankLocation;
@@ -18,13 +19,14 @@ import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.items.GroundItem;
 import org.dreambot.api.wrappers.widgets.message.Message;
+import java.util.Timer;
 
 @ScriptManifest(author = "Xaklon", category = Category.MISC, description = "Buys, sells, profit$", name = "FLIPPER 5.0", version = 4.0)
 public class Main extends AbstractScript {
-	GameObject Furnace;
+	GameObject furnace;
 	GameObject sink;
-	
-	
+	GameObject bank;
+	NPC foreman;
 	/*
 	 * 0 is smelting
 	 * 1 is running 
@@ -39,12 +41,22 @@ public class Main extends AbstractScript {
 	 * fill-bucket
 	 * 
 	 * SINK: 9143
-	 * 
+	 * foreman:2923
 	 * BANKCHEST: 26707
+	 * bankdeposit: 6948
 	 */
 	
+	
 	public void onStart(){
-		Furnace = getGameObjects().closest(9100);
+		furnace = getGameObjects().closest(9100);
+		sink = getGameObjects().closest(9143);
+		bank = getGameObjects().closest(26707);
+		foreman = getNpcs().closest(2923);
+		if(foreman!=null){
+			foreman.interact("Pay");
+			sleep(1300,2300);
+			getMouse().move(new Point(257, 403));
+		}
 	}
 	@Override
 	public int onLoop() {
@@ -53,9 +65,28 @@ public class Main extends AbstractScript {
 		return 0;
 	}
 	
+	public void Bank(){
+		if (bank != null){
+			sleep(1000,2000);
+			bank.interact("Use");
+			sleep(1000,2000);
+			getBank().withdrawAll("Coins");
+			sleep(1000,2000);
+			getBank().withdraw(440, 1);
+			sleep(1000,2000);
+			getBank().withdrawAll(440);
+			sleep(1000,2000);
+			getBank().close();
+
+		}
+	}
 	
 	public void Smelt(){
-		
+		getCamera().rotateToEntity(furnace);
+		if (furnace != null){
+			furnace.interact("Put-ore-on");
+			
+		}
 	}
 	
 	public void runToFurnace(){
