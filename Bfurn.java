@@ -23,15 +23,17 @@ import org.dreambot.api.wrappers.widgets.WidgetChild;
 import org.dreambot.api.wrappers.widgets.message.Message;
 import org.dreambot.api.utilities.Timer;
 
-@ScriptManifest(author = "Xaklon", category = Category.MISC, description = "Buys, sells, profit$", name = "bfurns 5.0", version = 4.0)
+@ScriptManifest(author = "Xaklon", category = Category.MISC, description = "Runs Blast Furnace", name = "bfurns 5.0", version = 4.0)
 public class Main extends AbstractScript {
 	GameObject furnace;
 	GameObject sink;
 	GameObject bank;
 	GameObject barDispenser;
+	public int oresSmelted = 0;
 	NPC foreman;
 	WidgetChild ironClick;
 	Timer t;
+	Timer realTime;
 	Tile conveyorTile = new Tile(1942, 4967);
 	Boolean needsToCool = true;
 	public int State = 0;
@@ -57,8 +59,9 @@ public class Main extends AbstractScript {
 	
 	
 	public void onStart(){
-		
-	ironClick = getWidgets().getWidgetChild(28, 109);
+	getSkillTracker().start(Skill.SMITHING);
+
+	realTime = new Timer();
 	t = new Timer();
 	payForeman();
 	
@@ -71,11 +74,19 @@ public class Main extends AbstractScript {
 	
 	public void onPaint(Graphics g){
 		g.drawString("" + t.elapsed(), 50, 50);
+		g.drawString("Ores per hour: "+ realTime.getHourlyRate(oresSmelted), 50, 110);
+		g.drawString("Ores: "+ oresSmelted, 50, 80);
+		g.drawString("XP/hr: "+ getSkillTracker().getGainedExperiencePerHour(Skill.SMITHING), 50, 160);
+		g.drawString("XP gained: "+ getSkillTracker().getGainedExperiencePerHour(Skill.SMITHING), 50, 120);
+
+
 	}
 	@Override
 	public int onLoop() {
-		if(t.elapsed()>=599500){
+		if (getDialogues().inDialogue() && getDialogues().canContinue()) { getDialogues().clickContinue();}
+		if(t.elapsed()>= 600000){ //599500){
 			payForeman();
+			State = 0;
 			t.reset();
 		}
 		
@@ -104,7 +115,7 @@ public class Main extends AbstractScript {
 		foreman = getNpcs().closest(2923);
 		if(foreman!=null){
 			foreman.interact("Pay");
-			sleep(1200,1700);
+			sleepUntil(() -> getDialogues().inDialogue(), 15000);
 			getKeyboard().type("1");
 			
 		}
@@ -116,30 +127,27 @@ public class Main extends AbstractScript {
 
 		bank = getGameObjects().closest(26707);
 		if (bank != null){
-			if(getInventory().contains(2351)){
-				sleep(1000,1500);
-				getBank().depositAll(2351);
-				getBank().deposit(2351, 28);
-
-			}
+			
 			sleep(1000,2000);
 			bank.interact("Use");
-			sleep(1000,2000);
+			sleepUntil(() -> getBank().isOpen(), 15000);
+			if(getInventory().contains(2351)){
+				getBank().depositAll(2351);
+				sleepUntil(() -> !getInventory().contains(2351), 15000);
+
+			}
 			
-			if(!getInventory().contains("Coins")){
-			getBank().withdrawAll("Coins");
-			sleep(1000,2000);
-			}
-			if(!getInventory().contains(1929)){
-			getBank().withdraw(1929, 1);
-			sleep(1000,2000);
-			}
+			
+			sleep(3000,4000);
 			//iron ore withdrawal
-			sleep(1500,2500);
+			if(!getInventory().contains(440)){
 			getBank().withdrawAll(440);
+			sleepUntil(() -> getInventory().contains(440), 15000);
+			}
 			sleep(1000,2000);
 			getBank().close();
-			sleep(2000,3000);
+			sleepUntil(() -> !getBank().isOpen(), 15000);
+
 			State = 1;
 			log("bank DONE");
 		}
@@ -155,50 +163,66 @@ public class Main extends AbstractScript {
 		}
 		getCamera().rotateToEntity(furnace);
 		sleep(1000,2000);
-		if (getWalking().getDestinationDistance() <= Calculations.random(2, 3)) {
+		if (getWalking().getDestinationDistance() <= Calculations.random(4, 7)) {
 			getWalking().walk(new Tile(1942, 4967));
 		}
 		sleep(300, 500);
-		if (conveyorTile.distance(getLocalPlayer()) <= Calculations.random(1,2)) {
+		if (conveyorTile.distance(getLocalPlayer()) <= Calculations.random(3,5)) {
 			sleep(2000,3000);
 			State = 2;
 		}
 	}
-	//state 2
+	
 	public void Smelt(){
 		furnace = getGameObjects().closest(9100);
 		getCamera().rotateToEntity(furnace);
 		if (furnace != null){
 			furnace.interact("Put-ore-on");
-			sleep(2000,3000);
+			sleepUntil(() -> getDialogues().inDialogue(), 15000);
 			getKeyboard().type("1");
-			sleep(1200,2400);
+		
+			sleepUntil(() -> !getInventory().contains(440), 15000);
+			oresSmelted+=26;
 			State = 3;
+			
 		}
 	}
 	
 	public void coolAndCollect(){
+		needsToCool = true;
 		barDispenser = getGameObjects().closest(9092);
 		if(barDispenser!=null){
 			if(needsToCool){
 				getInventory().get(1929).useOn(barDispenser);
+				//sleepUntil(() -> getLocalPlayer().distance(barDispenser), 15000);
+
+				sleep(3000,5000);
 			}
-			sleep(2000,3000);
+			
+			sleep(1000,2000);
 			State = 4;
+			log("cool walk over");
 			}
 		}
 	
 	public void barCollect(){
+		log("collecting");
+		ironClick = getWidgets().getWidgetChild(28, 109);
 		barDispenser = getGameObjects().closest(9092);
-		if(barDispenser!=null){
+		if(barDispenser!=null && barDispenser.hasAction("Take")){
 			barDispenser.interact("Take");
-			sleep(2000,3000);
+			sleep(1000,2000);
+		}
+		if(barDispenser!=null && barDispenser.hasAction("Search")){
+			sleepUntil(() -> barDispenser.hasAction("Take"), 15000);
+			barDispenser.interact("Take");
 		}
 		if(ironClick != null){
 			log("widget not null");
 			ironClick.interact();
-			sleep(2000,3000);
-			
+			sleepUntil(() -> getInventory().contains(2351), 15000);
+			getMouse().move(new Point(Calculations.random(482, 488),Calculations.random(40, 50)));
+			getMouse().click();
 			State = 0;
 	}
 	
