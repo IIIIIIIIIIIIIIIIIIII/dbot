@@ -1,0 +1,70 @@
+import java.awt.Font;
+import java.awt.Graphics;
+
+import org.dreambot.api.methods.Calculations;
+import org.dreambot.api.methods.container.impl.bank.BankLocation;
+import org.dreambot.api.methods.container.impl.bank.BankMode;
+import org.dreambot.api.methods.map.Area;
+import org.dreambot.api.methods.map.Tile;
+import org.dreambot.api.methods.skills.Skill;
+import org.dreambot.api.methods.tabs.Tab;
+import org.dreambot.api.methods.world.World;
+import org.dreambot.api.script.AbstractScript;
+import org.dreambot.api.script.Category;
+import org.dreambot.api.script.ScriptManifest;
+import org.dreambot.api.script.listener.MessageListener;
+import org.dreambot.api.utilities.Timer;
+import org.dreambot.api.wrappers.interactive.GameObject;
+import org.dreambot.api.wrappers.interactive.NPC;
+import org.dreambot.api.wrappers.items.GroundItem;
+import org.dreambot.api.wrappers.widgets.message.Message;
+
+@ScriptManifest(author = "Xaklon", category = Category.MISC, description = "Buys, sells, profit$", name = "FLIPPER 5.0", version = 4.0)
+public class Main extends AbstractScript {
+	GameObject Furnace;
+	GameObject sink;
+	
+	
+	/*
+	 * 0 is smelting
+	 * 1 is running 
+	 * 2 is water bucket 
+	 * 3 is waiting for fix
+	 * 4 is banking
+	 * 
+	 * 
+	 * conveyor belt id = 9100 
+	 * tile = 1943, 4967 
+	 * put-ore-on
+	 * fill-bucket
+	 * 
+	 * SINK: 9143
+	 * 
+	 * BANKCHEST: 26707
+	 */
+	
+	public void onStart(){
+		Furnace = getGameObjects().closest(9100);
+	}
+	@Override
+	public int onLoop() {
+
+		
+		return 0;
+	}
+	
+	
+	public void Smelt(){
+		
+	}
+	
+	public void runToFurnace(){
+		
+		
+	}
+	
+	
+	
+	
+
+}
