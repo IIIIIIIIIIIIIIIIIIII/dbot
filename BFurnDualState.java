@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -56,16 +57,20 @@ public class Main extends AbstractScript {
 	}
 	
 	public void onPaint(Graphics g){
-		g.drawString("" + realTime.formatTime(), 50, 50);
-		g.drawString("" + realTime.elapsed(), 120, 50);
+	    Font helvetica = new Font ("Helvetica", Font.BOLD, 14);  
+	    g.setFont(helvetica);
+		g.setColor(Color.BLACK);
+		g.fillRect(50, 40, 100, 180);
+		g.setColor(Color.GREEN);
 
-		g.drawString("Ores per hour: "+ realTime.getHourlyRate(oresSmelted), 50, 110);
+		g.drawString("Time ran:" + realTime.formatTime(), 50, 50);
+
+		g.drawString("Ores/hr "+ realTime.getHourlyRate(oresSmelted), 50, 110);
 		
 		g.drawString("Ores: "+ oresSmelted, 50, 80);
-		g.drawString("XP/hr: "+ getSkillTracker().getGainedExperiencePerHour(Skill.SMITHING), 50, 160);
-		g.drawString("XP gained: "+ getSkillTracker().getGainedExperience(Skill.SMITHING), 50, 135);
-		g.drawString(" "+ getDialogues().canContinue(), 80, 180);
-		g.drawString("State: "+ State, 50, 220);
+		g.drawString("XP/hr: "+ getSkillTracker().getGainedExperiencePerHour(Skill.SMITHING), 50, 140);
+		g.drawString("XP gained: "+ getSkillTracker().getGainedExperience(Skill.SMITHING), 50, 170);
+		g.drawString("State: "+ State, 50, 200);
 
 
 	}
@@ -177,18 +182,18 @@ public class Main extends AbstractScript {
 		if (getWalking().getDestinationDistance() <= Calculations.random(1, 2)) {
 			getWalking().walk(new Tile(1937, 4967));
 		}
-		sleep(1500, 3000);
+		sleep(1500, 2300);
 		if (conveyorPreTile.distance(getLocalPlayer()) <= Calculations.random(3,5)) {
 			State = 2;
 		}
 	}
 	public void walkOff2(){
 		getCamera().rotateToEntity(furnace);
-		sleep(1000,2000);
+		sleep(500,900);
 		if (getWalking().getDestinationDistance() <= Calculations.random(4, 7)) {
 			getWalking().walk(conveyorTile);
 		}
-		sleep(1500, 3000);
+		sleep(1000, 2000);
 		if (conveyorTile.distance(getLocalPlayer()) <= Calculations.random(3,5)) {
 			State = 3;
 		}
@@ -233,14 +238,15 @@ public class Main extends AbstractScript {
 		ironClick = getWidgets().getWidgetChild(28, 109);
 		barDispenser = getGameObjects().closest(9092);
 		if(getDialogues().inDialogue()){
-			State = 3;
+			State = 4;
 			sleep(2000,4000);
 		}
 		if(barDispenser!=null && barDispenser.hasAction("Take")){
 			barDispenser.interact("Take");
-			sleep(1000,2000);
+			sleep(500,800);
 		}
 		if(barDispenser!=null && barDispenser.hasAction("Search")){
+			getMouse().moveMouseOutsideScreen();
 			sleepUntil(() -> barDispenser.hasAction("Take"), 15000);
 			barDispenser.interact("Take");
 		}
