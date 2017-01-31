@@ -37,7 +37,8 @@ public class Main extends AbstractScript {
 	Timer realTime;
 	Tile conveyorPreTile = new Tile(1937, 4967);
 	Tile conveyorTile = new Tile(1942, 4967);
-
+	int tempStore = 0;
+	int tempStore2; 
 	Boolean needsToCool = true;
 	public int State = 0;
 
@@ -57,13 +58,16 @@ public class Main extends AbstractScript {
 	}
 	
 	public void onPaint(Graphics g){
-	    Font helvetica = new Font ("Helvetica", Font.BOLD, 14);  
-	    g.setFont(helvetica);
-		g.setColor(Color.BLACK);
-		g.fillRect(50, 40, 100, 180);
-		g.setColor(Color.GREEN);
+		Color myColor = new Color(0, 0, 0, 150);
+		Color greenColor = new Color(0, 239, 80, 150);
 
-		g.drawString("Time ran:" + realTime.formatTime(), 50, 50);
+	    Font helvetica = new Font ("Helvetica", Font.BOLD, 13);  
+	    g.setFont(helvetica);
+		g.setColor(myColor);
+		g.fillRect(50, 40, 100, 180);
+		g.setColor(greenColor);
+
+		g.drawString(realTime.formatTime(), 50, 55);
 
 		g.drawString("Ores/hr "+ realTime.getHourlyRate(oresSmelted), 50, 110);
 		
@@ -80,6 +84,8 @@ public class Main extends AbstractScript {
 		if (getDialogues().inDialogue() && getDialogues().canContinue()) { getDialogues().clickContinue();}
 		
 		if(foremanTimer.elapsed()>550000){
+			tempStore = State;
+			log("tempStore is equal to: "+tempStore);
 			if(State == 5){
 				getMouse().move(new Point(Calculations.random(482, 488),Calculations.random(40, 50)));
 				getMouse().click();
@@ -115,8 +121,9 @@ public class Main extends AbstractScript {
 			
 		}
 		if(State ==6){
+			
 			payForeman();
-			State = 0;
+			State = tempStore;
 		}
 		
 		
