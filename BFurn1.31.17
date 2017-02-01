@@ -24,7 +24,7 @@ import org.dreambot.api.wrappers.widgets.WidgetChild;
 import org.dreambot.api.wrappers.widgets.message.Message;
 import org.dreambot.api.utilities.Timer;
 
-@ScriptManifest(author = "Xaklon", category = Category.MISC, description = "Runs Blast Furnace", name = "bfurns 5.0", version = 4.0)
+@ScriptManifest(author = "Xaklon", category = Category.MISC, description = "Runs Blast Furnace", name = "XakBFurnace", version = 4.0)
 public class Main extends AbstractScript {
 	GameObject furnace;
 	GameObject sink;
@@ -100,6 +100,9 @@ public class Main extends AbstractScript {
 			foremanTimer.reset();
 		}
 		
+		if(State == 5 || State == 4 && getInventory().contains(440)){
+			State = 0;
+		}
 		if(State ==0){
 			Bank();
 		}
@@ -238,28 +241,33 @@ public class Main extends AbstractScript {
 		
 			sleepUntil(() -> !getInventory().contains(440), 15000);
 			oresSmelted+=26;
+			walkToDispenser();
 			State = 4;
-			
 		}
 	}
 	
 	WidgetChild collectWidget;
-	
+	Tile dispenserTile = new Tile(1940, 4964);
+	public void walkToDispenser(){
+		if (getWalking().getDestinationDistance() <= Calculations.random(2, 3)) {
+			getWalking().walk(dispenserTile);
+		}
+		sleepUntil(() -> getLocalPlayer().distance(dispenserTile) <= 0, 15000);
+
+	}
 	public void coolAndCollect(){
-		furnace = getGameObjects().closest(9100);
 
 		needsToCool = true;
 		barDispenser = getGameObjects().closest(9092);
 		if(barDispenser != null){
-			if(needsToCool){
-				getInventory().get(1929).useOn(barDispenser);
-				sleepUntil(() -> getLocalPlayer().distance(barDispenser) <= 1, 15000);
-
-			}
 			
-			State = 5;
+				getInventory().get(1929).useOn(barDispenser);
+				sleep(1000,2000);
 			log("cool walk over");
 			}
+		
+		State = 5;
+
 		}
 	
 	public void barCollect(){
@@ -268,7 +276,7 @@ public class Main extends AbstractScript {
 		
 		if(barDispenser!=null && barDispenser.hasAction("Take")){
 			barDispenser.interact("Take");
-			sleep(500,800);
+
 		}
 		if(barDispenser!=null && barDispenser.hasAction("Search")){
 			getMouse().moveMouseOutsideScreen();
@@ -315,8 +323,7 @@ public class Main extends AbstractScript {
 	@Override
 	public void onMessage(Message m) {
 		if (m.getMessage().contains("You don't need to cool the bars")) {
-			needsToCool = false;
-		
+			needsToCool = true;
 		}
 	}
 	
