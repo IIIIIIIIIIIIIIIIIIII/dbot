@@ -1,3 +1,4 @@
+
 import java.awt.Color;
 import java.awt.Graphics;
 
@@ -37,6 +38,8 @@ public class Main extends AbstractScript {
 	String[] statesList;
 	String stringState;
 	
+	Timer realTime;
+	
 	int State;
 	int chosenOreID = 440;
 	int smeltedBars = 2351; // after ores have been smelted, fetch in a public enum
@@ -49,6 +52,7 @@ public class Main extends AbstractScript {
 	
 	public void onStart(){
 		State = 0;
+		realTime = new Timer();
 	
 	}
 	@Override
@@ -86,28 +90,31 @@ public class Main extends AbstractScript {
 		} else if (State == 2) {
 			stringState ="Walk 1";
 		} else if (State == 3) {
-			stringState = "Walk 2";
-		} else if (State == 4) {
 			stringState = "Smelting";
+		} else if (State == 4) {
+			stringState = "Walk to collect";
 		} else if (State == 5) {
-			stringState ="Walk to collect";
+			stringState ="Pour Water";
 		} else if (State == 6) {
-			stringState = "Pour water";
+			stringState = "Collecting";
 		} else if (State == 7) {
-			stringState = "Collecing";
-		} else if (State == 8) {
-			stringState = "Walk to bank";
+			stringState = "Walk to Bank";
 		}
 		return stringState;
 		
 	}
 	
 	public void onPaint(Graphics g){
-		g.setColor(Color.BLACK);
-		g.fillRect(45, 45, 50, 50);
+		Color myColor = new Color(0, 0, 0, 122);
+		g.setColor(myColor);
+		g.fillRect(50, 40, 150, 150);
 		g.setColor(Color.GREEN);
 		g.drawString("State is: " + checkState(), 50, 50);
-		
+		g.drawString("Smelted: " + amountSmelted, 50, 80);
+        g.drawString("Smelts/hr " + realTime.getHourlyRate(amountSmelted), 50, 110);
+
+		g.drawString("XP/hr: " + getSkillTracker().getGainedExperiencePerHour(Skill.SMITHING), 50, 140);
+        g.drawString("XP gained: " + getSkillTracker().getGainedExperience(Skill.SMITHING), 50, 170);
 	}
 	
 	// State 0
@@ -173,7 +180,6 @@ public class Main extends AbstractScript {
 	}
 /*
 	public void walkToConveyor() {
-
 		  if(getWalking().getDestinationDistance() <=
 		  Calculations.random(2,3)){ getWalking().walk(conveyorTile); }
 		  if(getLocalPlayer
@@ -195,6 +201,7 @@ public class Main extends AbstractScript {
 
 		}
 		if (!getInventory().contains(chosenOreID)) {
+			amountSmelted += 27;
 			State = 4;
 		}
 		else if (getInventory().contains(chosenOreID)){
